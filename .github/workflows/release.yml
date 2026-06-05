@@ -51,7 +51,7 @@ jobs:
             echo "::error::Version mismatch: tag version ($TAG_VERSION) != tauri.conf.json version ($CONF_VERSION)"
             exit 1
           fi
-          echo "âœ?Version check passed: $TAG_VERSION"
+          echo "âœ… Version check passed: $TAG_VERSION"
 
       - name: Get version from tag
         id: get_version
@@ -210,7 +210,7 @@ jobs:
             printf '%s\n%s\n' "untrusted comment: tauri signing key" "$ONE" > "$KEY_PATH"
           fi
 
-          # Tauri CLI reads TAURI_SIGNING_PRIVATE_KEY as the raw key content (not base64-encoded)
+          # Encode as base64 environment variable
           if command -v base64 >/dev/null 2>&1; then
             KEY_B64=$(base64 < "$KEY_PATH" | tr -d '\r\n')
           elif command -v openssl >/dev/null 2>&1; then
@@ -223,7 +223,7 @@ jobs:
           if [ -n "$TAURI_KEY_PASSWORD" ]; then
             echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=$TAURI_KEY_PASSWORD" >> "$GITHUB_ENV"
           fi
-          echo "âœ?Tauri signing key prepared"
+          echo "âœ… Tauri signing key prepared"
 
       - name: Verify Rust and Tauri toolchain
         shell: bash
@@ -303,7 +303,7 @@ jobs:
           done
 
           if [ -z "$arm_dmg" ] || [ -z "$intel_dmg" ]; then
-            echo "â?Failed to detect both macOS DMG assets (arm + intel)" >&2
+            echo "âŒ Failed to detect both macOS DMG assets (arm + intel)" >&2
             ls -la dl
             exit 1
           fi
@@ -450,7 +450,7 @@ jobs:
             esac
           done
 
-          # æž„é€?JSON
+          # æž„é€  JSON
           tmp_json=$(mktemp)
           {
             echo '{'
