@@ -27,7 +27,7 @@ jobs:
       version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Validate manual beta tag
         if: github.event_name == 'workflow_dispatch'
@@ -51,7 +51,7 @@ jobs:
             echo "::error::Version mismatch: tag version ($TAG_VERSION) != tauri.conf.json version ($CONF_VERSION)"
             exit 1
           fi
-          echo "âœ… Version check passed: $TAG_VERSION"
+          echo "âœ?Version check passed: $TAG_VERSION"
 
       - name: Get version from tag
         id: get_version
@@ -59,7 +59,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.RELEASE_TAG }}
           name: 'AI Toolbox ${{ env.RELEASE_TAG }}'
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -138,7 +138,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -223,7 +223,7 @@ jobs:
           if [ -n "$TAURI_KEY_PASSWORD" ]; then
             echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=$TAURI_KEY_PASSWORD" >> "$GITHUB_ENV"
           fi
-          echo "âœ… Tauri signing key prepared"
+          echo "âœ?Tauri signing key prepared"
 
       - name: Verify Rust and Tauri toolchain
         shell: bash
@@ -263,7 +263,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout default branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
@@ -303,7 +303,7 @@ jobs:
           done
 
           if [ -z "$arm_dmg" ] || [ -z "$intel_dmg" ]; then
-            echo "âŒ Failed to detect both macOS DMG assets (arm + intel)" >&2
+            echo "â?Failed to detect both macOS DMG assets (arm + intel)" >&2
             ls -la dl
             exit 1
           fi
@@ -450,7 +450,7 @@ jobs:
             esac
           done
 
-          # æž„é€  JSON
+          # æž„é€?JSON
           tmp_json=$(mktemp)
           {
             echo '{'
