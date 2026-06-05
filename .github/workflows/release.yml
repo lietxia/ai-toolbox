@@ -122,6 +122,9 @@ jobs:
           - platform: windows-latest
             target: x86_64-pc-windows-msvc
             bundle: nsis,msi
+          - platform: windows-11-arm
+            target: aarch64-pc-windows-msvc
+            bundle: nsis,msi
           - platform: macos-latest
             target: x86_64-apple-darwin
             bundle: dmg,app
@@ -408,6 +411,7 @@ jobs:
           mac_intel_url=""; mac_intel_sig=""
           mac_arm_url=""; mac_arm_sig=""
           win_url=""; win_sig=""
+          win_arm_url=""; win_arm_sig=""
           linux_url=""; linux_sig=""
 
           shopt -s nullglob
@@ -428,9 +432,21 @@ jobs:
                 linux_url="$url"; linux_sig="$sig_content";;
               # Windows installers (NSIS .exe preferred, fallback to MSI)
               *-setup.exe)
-                win_url="$url"; win_sig="$sig_content";;
+                case "$fname" in
+                  *aarch64*|*arm64*) win_arm_url="$url"; win_arm_sig="$sig_content" ;;
+                  *)                win_url="$url";     win_sig="$sig_content" ;;
+                esac
+                ;;
               *.msi)
-                [ -z "$win_url" ] && { win_url="$url"; win_sig="$sig_content"; };;
+                case "$fname" in
+                  *aarch64*|*arm64*)
+                    [ -z "$win_arm_url" ] && { win_arm_url="$url"; win_arm_sig="$sig_content"; }
+                    ;;
+                  *)
+                    [ -z "$win_url" ] && { win_url="$url"; win_sig="$sig_content"; }
+                    ;;
+                esac
+                ;;
             esac
           done
 
@@ -459,6 +475,12 @@ jobs:
             if [ -n "$win_url" ] && [ -n "$win_sig" ]; then
               [ $first -eq 0 ] && echo ','
               echo "    \"windows-x86_64\": {\"signature\": \"$win_sig\", \"url\": \"$win_url\"}"
+              first=0
+            fi
+
+            if [ -n "$win_arm_url" ] && [ -n "$win_arm_sig" ]; then
+              [ $first -eq 0 ] && echo ','
+              echo "    \"windows-aarch64\": {\"signature\": \"$win_arm_sig\", \"url\": \"$win_arm_url\"}"
               first=0
             fi
 

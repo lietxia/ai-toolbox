@@ -105,7 +105,14 @@ pub async fn check_for_updates(
 fn detect_current_platform() -> String {
     #[cfg(target_os = "windows")]
     {
-        return "windows-x86_64".to_string();
+        #[cfg(target_arch = "aarch64")]
+        {
+            return "windows-aarch64".to_string();
+        }
+        #[cfg(not(target_arch = "aarch64"))]
+        {
+            return "windows-x86_64".to_string();
+        }
     }
 
     #[cfg(target_os = "linux")]
