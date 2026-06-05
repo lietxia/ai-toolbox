@@ -194,23 +194,23 @@ jobs:
             exit 0
           fi
 
+          # Tauri expects the key in its native format:
+          #   untrusted comment: <comment>
+          #   <base64-encoded key>
+          # If the secret is already in this format, use it directly.
+          # If it's raw base64, wrap it with the expected comment line.
           KEY_PATH="$RUNNER_TEMP/tauri_signing.key"
 
-          # 解析私钥格式
           if echo "$RAW" | head -n1 | grep -q '^untrusted comment:'; then
+            # Already in correct format
             printf '%s\n' "$RAW" > "$KEY_PATH"
-          elif DECODED=$(printf '%s' "$RAW" | (base64 --decode 2>/dev/null || base64 -D 2>/dev/null)) \
-               && echo "$DECODED" | head -n1 | grep -q '^untrusted comment:'; then
-            printf '%s\n' "$DECODED" > "$KEY_PATH"
-          elif echo "$RAW" | grep -Eq '^[A-Za-z0-9+/=]+$'; then
+          else
+            # Wrap raw base64 with the required comment line
             ONE=$(printf '%s' "$RAW" | tr -d '\r\n')
             printf '%s\n%s\n' "untrusted comment: tauri signing key" "$ONE" > "$KEY_PATH"
-          else
-            echo "❌ TAURI_SIGNING_PRIVATE_KEY format not recognized" >&2
-            exit 1
           fi
 
-          # 编码为 base64 环境变量
+          # Tauri CLI reads TAURI_SIGNING_PRIVATE_KEY as the raw key content (not base64-encoded)
           if command -v base64 >/dev/null 2>&1; then
             KEY_B64=$(base64 < "$KEY_PATH" | tr -d '\r\n')
           elif command -v openssl >/dev/null 2>&1; then
@@ -238,9 +238,9 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
           NODE_OPTIONS: --max-old-space-size=4096
+          # TAURI_SIGNING_PRIVATE_KEY is set by the "Prepare Tauri signing key" step via GITHUB_ENV
+          # TAURI_SIGNING_PRIVATE_KEY_PASSWORD is set by the "Prepare Tauri signing key" step via GITHUB_ENV
         with:
           releaseId: ${{ needs.create-release.outputs.release_id }}
           tauriScript: pnpm tauri
